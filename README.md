@@ -10,6 +10,7 @@ Simple application to generate self-signed SSL certificates for use in internal 
 ## Author
 
 Jessica Smith
+
 <jessica.smith@fasthosts.com>
 
 ## License
