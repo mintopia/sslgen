@@ -1,0 +1,18 @@
+{
+    "name": "mintopia/sslgen",
+    "description": "Simple self-signed SSL generation",
+    "authors": [
+        {
+            "name": "Jessica Smith",
+            "email": "jess@mintopia.net"
+        }
+    ],
+    "require": {
+    	"php": ">=5.6.0"
+    },
+    "autoload": {
+    	"psr-4": {
+    		"Mintopia\\SSLGen\\": "src/"
+    	}
+    }
+}
