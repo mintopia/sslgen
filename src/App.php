@@ -4,10 +4,12 @@
 	class App {
 		const DEFAULT_DURATION = 10;
 		const DEFAULT_KEY_SIZE = 2048;
+		const DEFAULT_CHAIN_SIZE = 0;
 
 		public $csr;
 		public $certificate;
 		public $key;
+		public $chain;
 
 		public $duration;
 		public $keySize;
@@ -22,6 +24,7 @@
 			$this->csr = new CSR;
 			$this->duration = self::DEFAULT_DURATION;
 			$this->keySize = self::DEFAULT_KEY_SIZE;
+			$this->chain = self::DEFAULT_CHAIN_SIZE;
 		}
 
 		protected function isPost() {
@@ -56,6 +59,9 @@
 			foreach ($propertyMapping as $classProperty => $postName) {
 				$this->csr->{$classProperty} = $this->getPost($postName, $this->csr->{$classProperty});
 			}
+			
+			$sans = $this->getPost('sans', $this->csr->getSANs());
+			$this->csr->setSANs($sans);
 		}
 
 		protected function createCertificate() {
@@ -66,8 +72,19 @@
 			$this->duration = $this->getPost('duration', $this->duration);
 			$this->keysize = $this->getPost('keysize', $this->keySize);
 
+			$chain = $this->getPost('chain', 0);
+
+			$parent = null;
+			for ($i = 0; $i < $chain; $i++) {
+				$csr = new CSR;
+				$csr->commonName = 'host' . mt_rand(1000, 9999) . '.ca.example.com';
+				$key = new PrivateKey($this->keysize);
+				$parent = new Certificate($csr, $key, $this->duration, $parent);
+			}
+
+
 			$this->key = new PrivateKey($this->keysize);
-			$this->certificate = new Certificate($this->csr, $this->key, $this->duration);
+			$this->certificate = new Certificate($this->csr, $this->key, $this->duration, $parent);
 		}
 
 		public function escape($value) {

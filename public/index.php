@@ -1,4 +1,5 @@
 <?php
+	ini_set('display_errors', 1);
 	require('../vendor/autoload.php');
 
 	use Mintopia\SSLGen\App;
@@ -19,9 +20,9 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>SSL Certificate Generator</title>
 
-		<link rel="stylesheet" href="https://static-content.fhpaas.fasthosts.net.uk/bootstrap/3.3.6/css/bootstrap.min.css">
-		<link rel="stylesheet" href="https://static-content.fhpaas.fasthosts.net.uk/highlight.js/9.5.0/styles/monokai-sublime.css">
-		<link rel="stylesheet" href="https://static-content.fhpaas.fasthosts.net.uk/fonts/css/open-sans.css">
+		<link rel="stylesheet" href="https://static-content-paas.int.gb.live-caas.net/bootstrap/3.3.6/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://static-content-paas.int.gb.live-caas.net/highlight.js/9.5.0/styles/monokai-sublime.css">
+		<link rel="stylesheet" href="https://static-content-paas.int.gb.live-caas.net/fonts/css/open-sans.css">
 		<link rel="stylesheet" href="css/ssl.css">
 	</head>
 	<body>
@@ -37,6 +38,12 @@
 					<label for="domain" class="col-sm-2 control-label">Domain (CN)</label>
 					<div class="col-sm-4">
 						<input type="text" class="form-control" name="domain" id="domain" placeholder="Domain Name (CN)" value="<?php echo escape($app->csr->commonName); ?>">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="sans" class="col-sm-2 control-label">Subject Alt Names</label>
+					<div class="col-sm-4">
+						<textarea class="form-control" name="sans" id="sans"><?php echo escape($app->csr->getSANs()) ?></textarea>
 					</div>
 				</div>
 
@@ -97,6 +104,13 @@
 				</div>
 
 				<div class="form-group">
+					<label for="countryname" class="col-sm-2 control-label">CA Chain Certs</label>
+					<div class="col-sm-1">
+						<input type="text" class="form-control" name="chain" id="chain" placeholder="CA Chain Certs" value="<?php echo escape($app->chain); ?>">
+					</div>
+				</div>
+
+				<div class="form-group">
 					<div class="col-sm-offset-2 col-sm-10">
 						<button type="submit" class="btn btn-primary">Generate</button>
 					</div>
@@ -128,14 +142,42 @@
 						<span class="text-muted">Without Linebreaks</span>
 						<textarea class="form-control"><?php echo escape($app->formatx509($app->key->export())); ?></textarea>
 					</div>
+
+					<?php
+						$cert = $app->certificate;
+						$parents = [];
+						while ($cert->parent !== null) {
+							$parents[] = $cert->parent;
+							$cert = $cert->parent;
+						}
+						if ($parents) {
+							?>
+							<div class="form-group">
+								<label>CA Bundle</label>
+								<textarea class="form-control"><?php
+								foreach ($parents as $cert) {
+									echo escape($cert->export());
+								}
+								?></textarea>
+								<br />
+								<span class="text-muted">Without Linebreaks</span>
+								<textarea class="form-control"><?php
+								foreach ($parents as $cert) {
+									echo escape($app->formatx509($cert->export()));
+								}
+								?></textarea>
+							</div>
+							<?php
+						}
+					?>
 				</form>
 			<?php } ?>
 		</div>
 	</div>
 
-	<script src="https://static-content.fhpaas.fasthosts.net.uk/jquery/1.12.4/jquery.min.js"></script>
-	<script src="https://static-content.fhpaas.fasthosts.net.uk/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-	<script src="https://static-content.fhpaas.fasthosts.net.uk/highlight.js/9.5.0/highlight.min.js"></script>
+	<script src="https://static-content-paas.int.gb.live-caas.net/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://static-content-paas.int.gb.live-caas.net/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script src="https://static-content-paas.int.gb.live-caas.net/highlight.js/9.5.0/highlight.min.js"></script>
 	<script src="js/ssl.js"></script>
 	</body>
 </html>
